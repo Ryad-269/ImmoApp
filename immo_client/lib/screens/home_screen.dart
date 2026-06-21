@@ -3,8 +3,6 @@ import '../services/api_service.dart';
 import '../models/property.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final String baseUrl = 'http://127.0.0.1:8000';
-
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -241,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           
                             leading: prop.photo != null
                                 ? Image.network(
-                                    '$baseUrl${prop.photo}',
+                                    prop.photo!,
                                     width: 80,
                                     height: 80,
                                     fit: BoxFit.cover,
