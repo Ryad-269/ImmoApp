@@ -6,6 +6,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from properties.views import PropertyViewSet, UserInfoView
 from django.http import HttpResponse
 from properties.views import RegisterView
+from django.conf import settings  
+from django.conf.urls.static import static
 
 router = DefaultRouter()
 router.register(r'properties', PropertyViewSet, basename='property')
@@ -22,3 +24,6 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view()),
     path('api/user/', UserInfoView.as_view()),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -120,6 +120,7 @@ class ApiService {
       throw Exception('Erreur suppression annonce');
     }
   }
+  
 
   static Future<void> register(
     String username,
@@ -180,4 +181,56 @@ class ApiService {
       );
     }
   }
+
+  // Mettre à jour une annonce avec une nouvelle photo (optionnelle)
+static Future<Map<String, dynamic>> updatePropertyWithImage({
+  required int id,
+  required String titre,
+  required String description,
+  required int prix,
+  required String district,
+  required int chambres,
+  int? superficie,
+  List<int>? photoBytes,    // Optionnel : si null, on ne change pas la photo
+  String? fileName,         // Optionnel
+}) async {
+  final uri = Uri.parse('$baseUrl/properties/$id/');
+  final request = http.MultipartRequest('PATCH', uri);  // 👈 PATCH pour modification partielle
+  
+  // Ajouter les champs textuels
+  request.fields['titre'] = titre;
+  request.fields['description'] = description;
+  request.fields['prix'] = prix.toString();
+  request.fields['district'] = district;
+  request.fields['chambres'] = chambres.toString();
+  if (superficie != null) {
+    request.fields['superficie'] = superficie.toString();
+  }
+  
+  // Ajouter la photo uniquement si elle est fournie
+  if (photoBytes != null && fileName != null) {
+    final multipartFile = http.MultipartFile.fromBytes(
+      'photo',
+      photoBytes,
+      filename: fileName,
+    );
+    request.files.add(multipartFile);
+  }
+  
+  // Ajouter le token d'authentification
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('access_token');
+  request.headers['Authorization'] = 'Bearer $token';
+  
+  final response = await request.send();
+  final responseBody = await response.stream.bytesToString();
+  
+  if (response.statusCode == 200) {
+    return json.decode(responseBody);
+  } else {
+    throw Exception(
+      'Erreur modification : ${response.statusCode} - $responseBody',
+    );
+  }
+}
 }

@@ -98,9 +98,25 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                   child: ListTile(
                     title: Text(prop.titre),
                     subtitle: Text('${prop.prix} FCFA - ${prop.district}'),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => _deleteProperty(prop.id),
+                    
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/edit-property',
+                              arguments: prop.id,  // Passer l'ID de l'annonce
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _deleteProperty(prop.id),
+                        ),
+                      ],
                     ),
                   ),
                 );

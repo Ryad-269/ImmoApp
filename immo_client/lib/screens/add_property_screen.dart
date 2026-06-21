@@ -1,5 +1,5 @@
 // lib/screens/add_property_screen.dart
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/api_service.dart';
@@ -17,7 +17,7 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
   String? _selectedDistrict;
   final _chambresController = TextEditingController();
   final _superficieController = TextEditingController();
-  File? _imageFile;
+  Uint8List? _imageBytes;  // 👈 MODIFICATION
   bool _isLoading = false;
 
   final List<String> _districts = [
@@ -31,13 +31,19 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) setState(() => _imageFile = File(pickedFile.path));
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: null,
+    );
+    if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();  // 👈 MODIFICATION
+      setState(() => _imageBytes = bytes);           // 👈 MODIFICATION
+    }
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_imageFile == null) {
+    if (_imageBytes == null) {                        // 👈 MODIFICATION
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Veuillez sélectionner une photo')),
       );
@@ -45,7 +51,6 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
     }
     setState(() => _isLoading = true);
     try {
-      final bytes = await _imageFile!.readAsBytes();
       await ApiService.createPropertyWithImage(
         titre: _titreController.text,
         description: _descriptionController.text,
@@ -55,8 +60,8 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
         superficie: _superficieController.text.isNotEmpty
             ? int.parse(_superficieController.text)
             : null,
-        photoBytes: bytes,
-        fileName: _imageFile!.path.split('/').last,
+        photoBytes: _imageBytes!,                       // 👈 MODIFICATION
+        fileName: 'image.jpg',                          // 👈 MODIFICATION
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Annonce publiée ! En attente de validation.')),
@@ -122,13 +127,15 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                         padding: EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
-                    if (_imageFile != null) ...[
+                    // 👇 AFFICHAGE DE L'IMAGE MODIFIÉ
+                    if (_imageBytes != null) ...[
                       SizedBox(height: 10),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          _imageFile!,
+                        child: Image.memory(
+                          _imageBytes!,
                           height: 150,
+                          width: double.infinity,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -148,7 +155,6 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
     );
   }
 
-  // Widget réutilisable pour un champ texte avec espacement uniforme
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -157,9 +163,7 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
     String? Function(String?)? validator,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(
-        bottom: 20.0,
-      ), // espacement vertical généreux
+      padding: const EdgeInsets.only(bottom: 20.0),
       child: TextFormField(
         controller: controller,
         decoration: InputDecoration(
@@ -174,7 +178,6 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
     );
   }
 
-  // Widget spécifique pour le dropdown Quartier
   Widget _buildDistrictDropdown() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
@@ -183,18 +186,16 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
           labelText: 'Quartier *',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-          // Assure que le label ne chevauche pas la zone de sélection
           alignLabelWithHint: true,
         ),
         value: _selectedDistrict,
-        hint: Text('Sélectionnez un quartier'), // évite l’affichage "null"
+        hint: Text('Sélectionnez un quartier'),
         items: [
           DropdownMenuItem(child: Text('Choisir'), value: null),
           ..._districts.map((d) => DropdownMenuItem(value: d, child: Text(d))),
         ],
         onChanged: (v) => setState(() => _selectedDistrict = v),
-        validator: (v) =>
-            v == null ? 'Veuillez sélectionner un quartier' : null,
+        validator: (v) => v == null ? 'Veuillez sélectionner un quartier' : null,
       ),
     );
   }

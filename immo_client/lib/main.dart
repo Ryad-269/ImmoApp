@@ -4,6 +4,7 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/add_property_screen.dart';
 import 'screens/owner_dashboard_screen.dart';
+import 'screens/edit_property_screen.dart';
 
 void main() => runApp(MyApp());
 
@@ -63,6 +64,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginScreen(),
         '/add-property': (context) => AddPropertyScreen(),
         '/dashboard': (context) => OwnerDashboardScreen(),
+        '/edit-property': (context) => EditPropertyScreen(), 
       },
     );
   }

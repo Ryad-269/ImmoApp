@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,7 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    
 ]
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000",
@@ -132,3 +134,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+
+# URL pour accéder aux fichiers médias (photos) via le navigateur
+MEDIA_URL = '/media/'
+
+# Dossier où les fichiers seront physiquement stockés
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Taille maximale des fichiers uploadés (10 Mo)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 Mo
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  

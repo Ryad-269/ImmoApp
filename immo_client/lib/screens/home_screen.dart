@@ -3,6 +3,8 @@ import '../services/api_service.dart';
 import '../models/property.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+final String baseUrl = 'http://127.0.0.1:8000';
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -188,19 +190,42 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text('Réinitialiser'),
                     ),
                     SizedBox(width: 8),
-                    // 🔘 NOUVEAU BOUTON DE TEST DE CONNEXION
-                    ElevatedButton(
-                      onPressed: _testLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                      ),
-                      child: Text('Connexion'),
-                    ),
+                    
                   ],
                 ),
               ],
             ),
           ),
+
+          // Dans le body du Scaffold
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.pushNamed(context, '/login'),
+                      icon: Icon(Icons.key, color: Colors.white),
+                      label: Text(
+                        'Se connecter (propriétaire)',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange[700],
+                        foregroundColor: Colors.white,
+                        minimumSize: Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Vous êtes propriétaire ? Connectez-vous pour publier et gérer vos annonces.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
           Expanded(
             child: _isLoading
                 ? Center(child: CircularProgressIndicator())
@@ -213,13 +238,37 @@ class _HomeScreenState extends State<HomeScreen> {
                       return Card(
                         margin: EdgeInsets.all(8),
                         child: ListTile(
-                          leading: prop.photo != null
-                              ? Image.network(
-                                  'http://10.0.2.2:8000${prop.photo}',
-                                  width: 80,
-                                  fit: BoxFit.cover,
-                                )
-                              : Icon(Icons.home, size: 80),
+                          
+                            leading: prop.photo != null
+                                ? Image.network(
+                                    '$baseUrl${prop.photo}',
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: 80,
+                                        height: 80,
+                                        color: Colors.grey[300],
+                                        child: Icon(Icons.broken_image, color: Colors.grey[600]),
+                                      );
+                                    },
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        width: 80,
+                                        height: 80,
+                                        color: Colors.grey[200],
+                                        child: Center(child: CircularProgressIndicator()),
+                                      );
+                                    },
+                                  )
+                                : Container(
+                                    width: 80,
+                                    height: 80,
+                                    color: Colors.grey[200],
+                                    child: Icon(Icons.home, size: 40, color: Colors.grey[400]),
+                                  ),
                           title: Text(prop.titre),
                           subtitle: Text(
                             '${prop.prix} FCFA - ${prop.district} - ${prop.chambres} pièces',
