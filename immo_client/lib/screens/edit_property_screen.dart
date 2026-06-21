@@ -155,7 +155,7 @@ class _EditPropertyScreenState extends State<EditPropertyScreen> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
-                          'http://127.0.0.1:8000${_property!.photo}',
+                          _property!.photo!,
                           height: 150,
                           width: double.infinity,
                           fit: BoxFit.cover,
